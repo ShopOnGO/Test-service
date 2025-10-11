@@ -1,8 +1,12 @@
 # Test-service
 Полный запуск приложения для тестирования
 
-подтянуть все изменения
+Ключ для подключения к тестовому сервису
+
+Подтянуть все изменения
 make pull-all
+
+Или можно по отдельности:
 
 для того чтобы подтянуть изменения в главном микросервисе
 docker pull ghcr.io/shopongo/auth-service:latest
@@ -22,5 +26,5 @@ docker pull ghcr.io/shopongo/favorites-service:latest
 для того чтобы подтянуть изменения в микросервисе медиа
 docker pull ghcr.io/shopongo/media-service:latest
 
-для того чтобы запустить всё
+# Для запуска всего
 docker compose up
