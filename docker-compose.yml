@@ -6,15 +6,12 @@ services:
     env_file:
       - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PGDATA=/data/postgres
+      - DSN=${DSN}
       - REDIS_ADDRESS=redis_container:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - KAFKA_BROKERS=kafka:9092
     depends_on:
       - redis_container
-      - go_shop_postgres
       - kafka
       - zookeeper
     ports:
@@ -22,14 +19,84 @@ services:
     networks:
       - shopongo_test
 
-  go_shop_postgres:
-    image: postgres:16.4
+  product:
+    image: ghcr.io/shopongo/product-service:latest
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PGDATA=/data/postgres
+      - DSN=${DSN}
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
     ports:
-      - "5432:5432"
+      - "8082:8082"
+    networks:
+      - shopongo_test
+
+  review:
+    image: ghcr.io/shopongo/review-service:latest
+    env_file:
+      - .env
+    environment:
+      - DSN=${DSN}
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "8080:8080"
+    networks:
+      - shopongo_test
+
+  search:
+    image: ghcr.io/shopongo/search-service:latest
+    env_file:
+      - .env
+    environment:
+      - DSN=${DSN}
+      - KAFKA_BROKERS=kafka:9092
+      - ELASTIC_URL=http://elasticsearch:9200
+      - ELASTIC_INDEX=products
+    depends_on:
+      - kafka
+      - zookeeper
+      - elasticsearch
+    ports:
+      - "8085:8085"
+    networks:
+      - shopongo_test
+
+  media:
+    image: ghcr.io/shopongo/media-service:latest
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/media/uploads
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+    ports:
+      - "8084:8084"
+    networks:
+      - shopongo_test
+
+  favorites:
+    image: ghcr.io/shopongo/favorites-service:latest
+    env_file:
+      - .env
+    environment:
+      - DSN=${DSN}
+      # - KAFKA_BROKERS=kafka:9092
+      # depends_on:
+      #   - kafka
+      #   - zookeeper
+    depends_on:
+      - product
+    ports:
+      - "8083:8083"
     networks:
       - shopongo_test
 
@@ -61,18 +128,42 @@ services:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_LOG4J_LOGGERS=root=ERROR,org.apache.kafka=ERROR
+      - KAFKA_CFG_LOG4J_ROOT_LOGLEVEL=ERROR
+      - KAFKA_LOG4J_OPTS=-Dlog4j.configuration=file:/opt/bitnami/kafka/config/log4j.properties
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
-      - "9093:9093"
     networks:
       - shopongo_test
+
+  elasticsearch:
+    image: docker.io/elasticsearch:7.17.13
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - logger.level=ERROR
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - shopongo_test
+      
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  esdata:
 
 networks:
   shopongo_test:
