@@ -8,6 +8,9 @@ make pull-all
 
 Или можно по отдельности:
 
+для того чтобы подтянуть изменения фронта
+docker pull ghcr.io/shopongo/frontend:latest
+
 для того чтобы подтянуть изменения в главном микросервисе
 docker pull ghcr.io/shopongo/auth-service:latest
 
