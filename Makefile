@@ -8,7 +8,8 @@ SERVICES = \
 	review-service \
 	search-service \
 	favorites-service \
-	media-service
+	media-service \
+	frontend
 
 # Подтянуть конкретный сервис
 pull-%:
