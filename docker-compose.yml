@@ -126,7 +126,7 @@ services:
       - shopongo_test
 
   zookeeper:
-    image: bitnami/zookeeper:3.8
+    image: bitnamilegacy/zookeeper:3.8
     restart: always
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
@@ -137,7 +137,7 @@ services:
       - shopongo_test
 
   kafka:
-    image: bitnami/kafka:3.3
+    image: bitnamilegacy/kafka:3.3
     restart: always
     environment:
       - KAFKA_BROKER_ID=1
