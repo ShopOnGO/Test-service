@@ -41,9 +41,21 @@ services:
     environment:
       - DSN=${DSN}
       - KAFKA_BROKERS=kafka:9092
+      - KAFKA_PRODUCT_TOPIC=product-events
+      - KAFKA_PRODUCT_GROUP_ID=product-group
+      - KAFKA_PRODUCT_CLIENT_ID=product-consumer
+      - KAFKA_VARIANT_TOPIC=productVariant-events
+      - KAFKA_VARIANT_GROUP_ID=productVariant-group
+      - KAFKA_VARIANT_CLIENT_ID=productVariant-consumer
+      - KAFKA_MEDIA_TOPIC=media-stored
+      - KAFKA_MEDIA_GROUP_ID=product-media-updater
+      - KAFKA_MEDIA_CLIENT_ID=product-media-consumer
+      - KAFKA_PRODUCER_TOPIC=products:product-created
     depends_on:
-      - kafka
-      - zookeeper
+      kafka:
+        condition: service_healthy
+      zookeeper:
+        condition: service_started
     ports:
       - "8082:8082"
     networks:
@@ -70,9 +82,9 @@ services:
       - .env
     environment:
       - DSN=${DSN}
-      - KAFKA_BROKERS=kafka:9092
       - ELASTIC_URL=http://elasticsearch:9200
       - ELASTIC_INDEX=products
+      - KAFKA_SEARCH_BROKERS=kafka:9092
     depends_on:
       - kafka
       - zookeeper
@@ -152,6 +164,11 @@ services:
       - KAFKA_LOG4J_OPTS=-Dlog4j.configuration=file:/opt/bitnami/kafka/config/log4j.properties
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      retries: 12
+      timeout: 5s
     ports:
       - "9092:9092"
     networks:

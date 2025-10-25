@@ -30,4 +30,4 @@ docker pull ghcr.io/shopongo/favorites-service:latest
 docker pull ghcr.io/shopongo/media-service:latest
 
 # Для запуска всего
-docker compose up
+docker compose up --build
