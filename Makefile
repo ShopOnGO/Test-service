@@ -9,6 +9,7 @@ SERVICES = \
 	search-service \
 	favorites-service \
 	media-service \
+	notification-service \
 	frontend
 
 # Подтянуть конкретный сервис

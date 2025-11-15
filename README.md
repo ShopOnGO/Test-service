@@ -29,5 +29,8 @@ docker pull ghcr.io/shopongo/favorites-service:latest
 для того чтобы подтянуть изменения в микросервисе медиа
 docker pull ghcr.io/shopongo/media-service:latest
 
+для того чтобы подтянуть изменения в микросервисе уведомлений
+docker pull ghcr.io/shopongo/notification-service:latest
+
 # Для запуска всего
 docker compose up --build

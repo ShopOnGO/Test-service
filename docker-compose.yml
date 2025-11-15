@@ -127,6 +127,30 @@ services:
     networks:
       - shopongo_test
 
+  notify:
+    image: ghcr.io/shopongo/notification-service:latest
+    env_file:
+      - .env
+    environment:
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_NOTIFY_TOPIC=${KAFKA_NOTIFY_TOPIC}
+      - KAFKA_NOTIFY_CONSUMER=${KAFKA_NOTIFY_CONSUMER}
+      - KAFKA_SMTP_CONSUMER=${KAFKA_SMTP_CONSUMER}
+      - KAFKA_NOTIFICATION_TOPICS=${KAFKA_NOTIFICATION_TOPICS}
+      - MONGO_URI=${MONGO_URI}
+      - MONGO_DB=${MONGO_DB}
+      - SMTP_NAME=${SMTP_NAME}
+      - SMTP_FROM=${SMTP_FROM}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+    depends_on:
+      - mongo
+    ports:
+      - "8079:8079"
+    networks:
+      - shopongo_test
+
   redis_container:
     image: redis:latest
     restart: always
@@ -136,6 +160,20 @@ services:
       - "6379:6379"
     networks:
       - shopongo_test
+
+  mongo:
+    image: mongo:6.0
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - shopongo_test
+    ports:
+      - "27017:27017"
 
   zookeeper:
     image: bitnamilegacy/zookeeper:3.8
@@ -207,6 +245,7 @@ services:
 
 volumes:
   esdata:
+  mongo_data:
 
 networks:
   shopongo_test:
