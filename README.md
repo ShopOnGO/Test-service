@@ -32,5 +32,12 @@ docker pull ghcr.io/shopongo/media-service:latest
 для того чтобы подтянуть изменения в микросервисе уведомлений
 docker pull ghcr.io/shopongo/notification-service:latest
 
+
+для синхронизации Elastic Search с базой данных команда
+
+```
+docker compose run --rm logstash -f /usr/share/logstash/logstash_internal/postgres_to_es.conf
+```
+
 # Для запуска всего
 docker compose up --build
