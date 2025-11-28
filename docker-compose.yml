@@ -240,12 +240,16 @@ services:
       - elasticsearch
     volumes:
       - ./internal/logstash:/usr/share/logstash/logstash_internal
-    env_file:
-      - .env
-    environment:
-      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
     networks:
       - shopongo_test
+    command: -f /usr/share/logstash/logstash_internal/postgres_to_es.conf
+    environment:
+      - "LS_JAVA_OPTS=-Xms512m -Xmx512m"
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
   nginx:
     image: nginx:latest
