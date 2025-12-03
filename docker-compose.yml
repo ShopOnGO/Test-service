@@ -259,6 +259,13 @@ services:
       - ./pkg/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - auth
+      - search
+      - review
+      - product
+      - notify
+      - favorites
+      - media
+
     networks:
       - shopongo_test
 
